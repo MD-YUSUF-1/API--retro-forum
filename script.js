@@ -6,14 +6,24 @@ const loadPosts =async( searchText)=> {
 
     // console.log(`https://openapi.programming-hero.com/api/retro-forum/posts${ searchText? `?category=${searchText}`:""}`)
 
-
+    document.getElementById("post-container").innerHTML="";
     const response = await fetch(`https://openapi.programming-hero.com/api/retro-forum/posts${searchText?`?category=${searchText}` : ""}`)
     const data = await response.json();
-    display(data.posts);
+    displayPost(data.posts);
 }  
 
+const loaderOfLatestPost = document.getElementById("latestPostLoader");
+const loadLatestPosts =async()=> {
 
-const display =(data)=> {
+    // console.log(`https://openapi.programming-hero.com/api/retro-forum/posts${ searchText? `?category=${searchText}`:""}`)
+    loaderOfLatestPost.classList.remove("hidden")
+    const response = await fetch(`https://openapi.programming-hero.com/api/retro-forum/latest-posts`)
+    const data = await response.json();
+    displayLatestPost(data);
+} 
+
+
+const displayPost =(data)=> {
     const postContainer = document.getElementById("post-container");
     data.forEach(e => {
         const div = document.createElement('div');
@@ -63,9 +73,44 @@ const display =(data)=> {
         `
 
         postContainer.appendChild(div);
+        loaderOfLatestPost.classList.add("hidden");
     });
 }
 
+
+const displayLatestPost = (latestPost) =>{
+    const latestPostContainer = document.getElementById("latest-post-container");
+ latestPost.forEach(e => {
+        const div = document.createElement('div');
+        div.innerHTML=`
+        <div class="card lg:w-96 pb-5 bg-base-100 shadow-2xl">
+          <figure class="lg:px-6 px-4 pt-4 lg:pt-8">
+            <img src=${e.cover_image} alt="Shoes" class="rounded-xl" />
+          </figure>
+          <div class="p-5 lg:p-10 space-y-4 lg:space-y-5">
+            <p class="opacity-50 text-start">
+              <i class="fa-solid fa-calendar-days me-2"></i>${e?.author?.posted_date || "No Publish Date"} 
+            </p>
+            <h2 class="card-title text-start">${e.title}</h2>
+            <p class="text-start">
+            ${e.description}
+            </p>
+            <div class="card-actions flex gap-5 items-center">
+              <div class="avatar">
+                <div class="lg:w-12 w-10 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+                  <img src=${e.profile_image} />
+                </div>
+              </div>
+              <div>
+                <h3 class="text-start font-extrabold">author.name</h3>
+                <p class="text-start opacity-60">${e.author?.designation || "Unknown" }</p>
+              </div>
+            </div>
+            
+        `
+        latestPostContainer.appendChild(div);
+ });
+}
 
 const markAsRead = ( description , view_count)=>{
     const markAsReadContainer = document.getElementById("markAsReadContainer");
@@ -92,10 +137,14 @@ const handleCount=()=>{
     const sum = convertedCount+1;
     document.getElementById('markAsReadCounter').innerText = sum;
 }
+
+
 const handleSearchByCategory= () =>{
     const searchText = document.getElementById("searchPosts").value;
     loadPosts(searchText);
+    document.getElementById("searchPosts").value="";
 } 
 
 
 loadPosts();
+loadLatestPosts();
